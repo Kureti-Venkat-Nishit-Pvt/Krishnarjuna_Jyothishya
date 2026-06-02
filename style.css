@@ -77,22 +77,22 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Scroll-scrub frame animation (hero canvas) */
+/* Scroll-scrub frame animation (hero canvas) — shorter scroll = less blank area */
 .hero.scroll-animation {
-  height: 400vh;
+  height: 200vh;
   min-height: auto;
   background: transparent !important;
 }
 
 @media (max-width: 1024px) {
   .hero.scroll-animation {
-    height: 350vh;
+    height: 120vh;
   }
 }
 
 @media (max-width: 768px) {
   .hero.scroll-animation {
-    height: 300vh;
+    height: 180vh;
   }
 }
 

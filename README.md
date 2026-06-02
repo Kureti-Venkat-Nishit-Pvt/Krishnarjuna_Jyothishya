@@ -11,7 +11,7 @@
 ![Astrology](https://img.shields.io/badge/Jyothisha-Vedic_Astrology-darkred?style=for-the-badge&logo=starship&logoColor=gold)
 ![Mahabharata](https://img.shields.io/badge/Inspired_By-Mahabharata-red?style=for-the-badge&logo=bookstack&logoColor=gold)
 ![Nakshatra Nadi](https://img.shields.io/badge/Nakshatra-Nadi-yellow?style=for-the-badge&logo=sparkles&logoColor=black)
-![Responsive](https://img.shields.io/badge/Responsive-Desktop_Friendly-gold?style=for-the-badge&logo=googlechrome&logoColor=black)
+![Responsive](https://img.shields.io/badge/Responsive-Mobile_Friendly-gold?style=for-the-badge&logo=googlechrome&logoColor=black)
 ![WhatsApp](https://img.shields.io/badge/WhatsApp-Consultation-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)
 ![GitHub](https://img.shields.io/badge/GitHub-Mark__6-black?style=for-the-badge&logo=github)
 
@@ -92,17 +92,6 @@ This platform provides:
 
 ---
 
-# 📸 Website Preview
-
-<div align="center">
-
-## 🕉 Krishna • Arjuna • Vishnu Theme 🕉
-
-<img src="./krishna-arjuna-vishnu.jpg" width="100%" alt="Website Preview"/>
-
-</div>
----
-
 
 
 # ☎️ Connect With Me
@@ -146,25 +135,33 @@ This platform provides:
 ![HTML](https://img.shields.io/badge/HTML-5-orange?style=for-the-badge&logo=html5)
 ![CSS](https://img.shields.io/badge/CSS-3-blue?style=for-the-badge&logo=css3)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript&logoColor=black)
+
 ---
+
 # 📂 Project Structure
 
 ```text
-
-Krishnarjuna_Jyothishya/
-
-│── index.html
-
-│── style.css
-
-│── script.js
-
-│── README.md
-
-│── krishna-arjuna-vishnu.jpg
-
+Krishnarjuna_Jyothishya_M6/
+├── index.html
+├── style.css
+├── script.js
+├── README.md
+├── krishna-arjuna-vishnu.jpg
+└── Public/
+    └── Frames/
+        ├── KAJ_BG-001.jpg
+        ├── KAJ_BG-002.jpg
+        └── … KAJ_BG-150.jpg
 ```
 
+---
+
+# 🚀 Run & Deploy
+
+1. Open `index.html` with **Live Server** (or any local server), not only double-clicking the file.
+2. Commit the entire `Public/Frames/` folder to GitHub (all 150 images).
+3. GitHub Pages → deploy from branch root; paths are case-sensitive (`Public/Frames`, not `public/frames`).
+4. Hard-refresh after deploy: `Ctrl + F5`.
 
 ---
 

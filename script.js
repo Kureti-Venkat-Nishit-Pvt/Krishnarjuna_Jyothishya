@@ -10,34 +10,60 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   // ── 1. HERO FRAME ANIMATION ─────────────────────────────────
-  // Frames: public/frames/KAJ_BG-001.jpg, KAJ_BG-002.jpg, … (names unchanged)
-  const FRAME_COUNT = 150; // KAJ_BG-001.jpg … KAJ_BG-150.jpg in public/frames/
-  const FRAMES_BASE = './public/frames/';
+  // Frames: Public/Frames/KAJ_BG-001.jpg … KAJ_BG-150.jpg (names unchanged)
+  const FRAME_COUNT = 150;
+  const FRAME_PATHS = [
+    'Public/Frames/KAJ_BG-',
+    './Public/Frames/KAJ_BG-',
+    'public/frames/KAJ_BG-',
+    './public/frames/KAJ_BG-'
+  ];
 
-  function framePath(n) {
-    return FRAMES_BASE + 'KAJ_BG-' + String(n).padStart(3, '0') + '.jpg';
+  function framePath(n, pathIndex) {
+    const base = FRAME_PATHS[pathIndex !== undefined ? pathIndex : 0];
+    return base + String(n).padStart(3, '0') + '.jpg';
   }
 
-  const HERO_TEXT_FADE_END = 0.08;
+  const HERO_TEXT_FADE_END = 0.25;
   const heroSection = document.getElementById('hero');
   const canvas = document.getElementById('hero-canvas');
   const heroContent = document.querySelector('.hero-content');
 
   if (heroSection && canvas) {
     const ctx = canvas.getContext('2d');
-    const frames = [];
-    let loaded = false;
+    const frames = new Array(FRAME_COUNT);
+    let heroReady = false;
     let lastFrame = -1;
     let ticking = false;
     let loadedCount = 0;
     let successCount = 0;
+    const BATCH_SIZE = 12;
+
+    function getFrameImage(index) {
+      if (frames[index] && frames[index].naturalWidth) {
+        return frames[index];
+      }
+      for (let i = index; i >= 0; i--) {
+        if (frames[i] && frames[i].naturalWidth) {
+          return frames[i];
+        }
+      }
+      for (let j = index + 1; j < FRAME_COUNT; j++) {
+        if (frames[j] && frames[j].naturalWidth) {
+          return frames[j];
+        }
+      }
+      return null;
+    }
 
     function drawFrame(index) {
-      const img = frames[index];
-      if (!ctx || !img || !img.complete || !img.naturalWidth) return;
+      const img = getFrameImage(index);
+      if (!ctx || !img) return;
 
       const cw = canvas.clientWidth;
       const ch = canvas.clientHeight;
+      if (!cw || !ch) return;
+
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = cw / ch;
       let drawW;
@@ -71,20 +97,29 @@ document.addEventListener('DOMContentLoaded', function () {
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (lastFrame >= 0) drawFrame(lastFrame);
+      if (heroReady && lastFrame >= 0) {
+        drawFrame(lastFrame);
+      }
     }
 
-    function startHeroFrames() {
-      if (loaded) return;
-      loaded = true;
+    function enableHero() {
+      if (heroReady) return;
+      heroReady = true;
       resizeCanvas();
-      drawFrame(0);
-      lastFrame = 0;
       onScroll();
     }
 
+    function frameIndexForProgress(progress) {
+      if (progress <= 0) return 0;
+      if (progress >= 1) return FRAME_COUNT - 1;
+      return Math.min(
+        FRAME_COUNT - 1,
+        Math.max(0, Math.round(progress * (FRAME_COUNT - 1)))
+      );
+    }
+
     function onScroll() {
-      if (!loaded || ticking) return;
+      if (ticking) return;
       ticking = true;
 
       requestAnimationFrame(function () {
@@ -95,41 +130,73 @@ document.addEventListener('DOMContentLoaded', function () {
           ? 0
           : Math.min(1, Math.max(0, -rect.top / scrollable));
 
-        const frameIndex = Math.min(
-          FRAME_COUNT - 1,
-          Math.floor(progress * FRAME_COUNT)
-        );
-
-        if (frameIndex !== lastFrame) {
-          lastFrame = frameIndex;
-          drawFrame(frameIndex);
+        if (heroReady) {
+          const frameIndex = frameIndexForProgress(progress);
+          if (frameIndex !== lastFrame) {
+            lastFrame = frameIndex;
+            drawFrame(frameIndex);
+          }
         }
 
         if (heroContent) {
-          const opacity = Math.max(0, 1 - progress / HERO_TEXT_FADE_END);
-          heroContent.style.opacity = String(opacity);
-          heroContent.style.transform =
-            'translateY(' + ((1 - opacity) * 12) + 'px)';
+          if (progress < 0.04) {
+            heroContent.style.opacity = '1';
+            heroContent.style.transform = 'translateY(0)';
+          } else {
+            const opacity = Math.max(0.35, 1 - progress / HERO_TEXT_FADE_END);
+            heroContent.style.opacity = String(opacity);
+            heroContent.style.transform =
+              'translateY(' + ((1 - opacity) * 12) + 'px)';
+          }
         }
       });
     }
 
-    function onFrameLoad() {
+    function onFrameSettled() {
       loadedCount++;
       if (loadedCount >= FRAME_COUNT && successCount === 0) {
         showGradientFallback();
       }
     }
 
-    function onFrameSuccess() {
-      successCount++;
-      if (!loaded && frames[0] && frames[0].naturalWidth) {
-        startHeroFrames();
+    function loadFrame(index, pathTry) {
+      const img = new Image();
+      img.onload = function () {
+        frames[index] = img;
+        successCount++;
+        onFrameSettled();
+        if (index === 0) {
+          enableHero();
+        } else if (heroReady && index === lastFrame) {
+          drawFrame(index);
+        }
+      };
+      img.onerror = function () {
+        if (pathTry + 1 < FRAME_PATHS.length) {
+          loadFrame(index, pathTry + 1);
+        } else {
+          onFrameSettled();
+        }
+      };
+      img.src = framePath(index + 1, pathTry);
+    }
+
+    function loadFrameBatch(start) {
+      const end = Math.min(start + BATCH_SIZE, FRAME_COUNT);
+      for (let i = start; i < end; i++) {
+        loadFrame(i, 0);
+      }
+      if (end < FRAME_COUNT) {
+        window.setTimeout(function () {
+          loadFrameBatch(end);
+        }, 40);
       }
     }
 
     function showGradientFallback() {
-      if (!ctx) return;
+      if (!ctx || heroReady) return;
+      heroReady = true;
+      lastFrame = 0;
       resizeCanvas();
       const cw = canvas.clientWidth;
       const ch = canvas.clientHeight;
@@ -140,31 +207,32 @@ document.addEventListener('DOMContentLoaded', function () {
       gradient.addColorStop(1, '#1a0d00');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, cw, ch);
+      if (heroContent) {
+        heroContent.style.opacity = '1';
+      }
       console.warn(
-        'Hero frames could not be loaded. Check public/frames/KAJ_BG-001.jpg … KAJ_BG-' +
+        'Hero frames could not be loaded. Check Public/Frames/KAJ_BG-001.jpg … KAJ_BG-' +
         String(FRAME_COUNT).padStart(3, '0') + '.jpg'
       );
     }
 
-    for (let i = 1; i <= FRAME_COUNT; i++) {
-      const img = new Image();
-      img.src = framePath(i);
-      img.onload = function () {
-        onFrameLoad();
-        onFrameSuccess();
-      };
-      img.onerror = onFrameLoad;
-      frames[i - 1] = img;
+    if (heroContent) {
+      heroContent.style.opacity = '1';
     }
 
     resizeCanvas();
+    loadFrame(0, 0);
+    window.setTimeout(function () {
+      loadFrameBatch(1);
+    }, 0);
 
-    setTimeout(function () {
-      if (!loaded) showGradientFallback();
-    }, 12000);
-
-    window.addEventListener('resize', resizeCanvas);
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', resizeCanvas);
+    onScroll();
+
+    window.setTimeout(function () {
+      if (!heroReady) showGradientFallback();
+    }, 8000);
   }
 
   // ── 2. SCROLL REVEAL ANIMATION ─────────────────────────────

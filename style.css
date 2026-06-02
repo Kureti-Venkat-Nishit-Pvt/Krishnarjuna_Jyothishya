@@ -1,8 +1,6 @@
 /* ============================================================
    KRISHNARJUNA JYOTHISHA — style.css
-   FIX: .hero now properly defines background-image as a fallback.
-   The inline style in index.html takes priority and ensures the
-   image loads even when opened as a local file.
+   Hero background: scroll-driven frames on #hero-canvas (see script.js).
    ============================================================ */
 
 /* ── RESET & BASE ── */
@@ -27,15 +25,7 @@ body {
 .hero {
   position: relative;
   min-height: 100vh;
-  /* FIX: background-image declared here as CSS fallback.
-     The inline style="background-image: url('krishna-arjuna-vishnu.jpg')"
-     on the <header> in index.html overrides this and ensures the image
-     always loads correctly regardless of how the file is served. */
-  background-image: url('krishna-arjuna-vishnu.jpg');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,8 +80,7 @@ body {
 .hero.scroll-animation {
   height: 400vh;
   min-height: auto;
-  background-image: none;
-  background-attachment: scroll;
+  background: transparent !important;
 }
 
 @media (max-width: 1024px) {
@@ -116,6 +105,7 @@ body {
   justify-content: center;
   text-align: center;
   overflow: hidden;
+  z-index: 2;
 }
 
 #hero-canvas {
@@ -123,8 +113,9 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
+  background: #0d0a06;
 }
 
 /* ── BUTTONS ── */
@@ -365,11 +356,6 @@ footer p {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  .hero:not(.scroll-animation) {
-    /* On mobile, fixed attachment can cause issues on iOS — switch to scroll */
-    background-attachment: scroll;
-  }
-
   .service-grid {
     grid-template-columns: 1fr 1fr;
   }

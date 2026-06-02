@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // ── 1. HERO FRAME ANIMATION ─────────────────────────────────
   // Frames: public/frames/KAJ_BG-001.jpg, KAJ_BG-002.jpg, … (names unchanged)
   const FRAME_COUNT = 150; // KAJ_BG-001.jpg … KAJ_BG-150.jpg in public/frames/
-  const FRAMES_BASE = 'public/frames/';
+  const FRAMES_BASE = './public/frames/';
 
   function framePath(n) {
     return FRAMES_BASE + 'KAJ_BG-' + String(n).padStart(3, '0') + '.jpg';
@@ -30,13 +30,14 @@ document.addEventListener('DOMContentLoaded', function () {
     let lastFrame = -1;
     let ticking = false;
     let loadedCount = 0;
+    let successCount = 0;
 
     function drawFrame(index) {
       const img = frames[index];
       if (!ctx || !img || !img.complete || !img.naturalWidth) return;
 
-      const cw = canvas.width;
-      const ch = canvas.height;
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = cw / ch;
       let drawW;
@@ -63,11 +64,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function resizeCanvas() {
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (lastFrame >= 0) drawFrame(lastFrame);
+    }
+
+    function startHeroFrames() {
+      if (loaded) return;
+      loaded = true;
+      resizeCanvas();
+      drawFrame(0);
+      lastFrame = 0;
+      onScroll();
     }
 
     function onScroll() {
@@ -101,21 +114,25 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    function tryStart() {
+    function onFrameLoad() {
       loadedCount++;
-      if (loadedCount < FRAME_COUNT) return;
-      loaded = true;
-      resizeCanvas();
-      drawFrame(0);
-      lastFrame = 0;
-      onScroll();
+      if (loadedCount >= FRAME_COUNT && successCount === 0) {
+        showGradientFallback();
+      }
+    }
+
+    function onFrameSuccess() {
+      successCount++;
+      if (!loaded && frames[0] && frames[0].naturalWidth) {
+        startHeroFrames();
+      }
     }
 
     function showGradientFallback() {
       if (!ctx) return;
       resizeCanvas();
-      const cw = canvas.width;
-      const ch = canvas.height;
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
       const gradient = ctx.createLinearGradient(0, 0, cw, ch);
       gradient.addColorStop(0, '#1a0a00');
       gradient.addColorStop(0.3, '#2d1500');
@@ -132,14 +149,19 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const img = new Image();
       img.src = framePath(i);
-      img.onload = tryStart;
-      img.onerror = tryStart;
+      img.onload = function () {
+        onFrameLoad();
+        onFrameSuccess();
+      };
+      img.onerror = onFrameLoad;
       frames[i - 1] = img;
     }
 
+    resizeCanvas();
+
     setTimeout(function () {
       if (!loaded) showGradientFallback();
-    }, 15000);
+    }, 12000);
 
     window.addEventListener('resize', resizeCanvas);
     window.addEventListener('scroll', onScroll, { passive: true });

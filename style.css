@@ -86,6 +86,47 @@ body {
   margin-bottom: 2rem;
 }
 
+/* Scroll-scrub frame animation (hero canvas) */
+.hero.scroll-animation {
+  height: 400vh;
+  min-height: auto;
+  background-image: none;
+  background-attachment: scroll;
+}
+
+@media (max-width: 1024px) {
+  .hero.scroll-animation {
+    height: 350vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero.scroll-animation {
+    height: 300vh;
+  }
+}
+
+.hero-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+#hero-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ── BUTTONS ── */
 .btn {
   display: inline-flex;
@@ -324,7 +365,7 @@ footer p {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  .hero {
+  .hero:not(.scroll-animation) {
     /* On mobile, fixed attachment can cause issues on iOS — switch to scroll */
     background-attachment: scroll;
   }

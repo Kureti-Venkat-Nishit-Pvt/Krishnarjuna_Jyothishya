@@ -13,24 +13,26 @@
 </head>
 <body>
 
-  <!-- HERO -->
-  <!-- FIX: background-image set directly via inline style so it works when opened as a local file -->
-  <header class="hero" style="background-image: url('krishna-arjuna-vishnu.jpg');">
-    <div class="overlay"></div>
-    <div class="hero-content">
-      <h1>KRISHNARJUNA JYOTHISHA</h1>
-      <p class="quote">
-        "Based on previous birth karma, destiny is decided before birth.
-        We are the master of our destiny!"
-      </p>
-      <p class="sub-quote">
-        Dharma is the only way to heaven. <br />
-        Adharma is the painful way to hell.
-      </p>
-      <a href="https://wa.me/919449708568" target="_blank" class="btn">
-        <i class="fa-brands fa-whatsapp"></i>
-        WhatsApp Now
-      </a>
+  <!-- HERO — scroll-driven frame animation (public/frames/KAJ_BG-001.jpg …) -->
+  <header class="hero scroll-animation" id="hero">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-sticky">
+      <div class="overlay"></div>
+      <div class="hero-content">
+        <h1>KRISHNARJUNA JYOTHISHA</h1>
+        <p class="quote">
+          "Based on previous birth karma, destiny is decided before birth.
+          We are the master of our destiny!"
+        </p>
+        <p class="sub-quote">
+          Dharma is the only way to heaven. <br />
+          Adharma is the painful way to hell.
+        </p>
+        <a href="https://wa.me/919449708568" target="_blank" class="btn">
+          <i class="fa-brands fa-whatsapp"></i>
+          WhatsApp Now
+        </a>
+      </div>
     </div>
   </header>
 
